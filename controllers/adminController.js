@@ -5,7 +5,44 @@ import dotenv from "dotenv"
 dotenv.config()
 
 
+export async function registerAdmin(req, res) {
+    const { Name, email, password } = req.body;
 
+    try {
+        // Check if user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({
+                message: "User already exists"
+            });
+        }
+
+        // Hash the password
+        const hashedPassword = bcrypt.hashSync(password, 10);
+
+        // Create new user
+        const newUser = new User({
+            Name,
+            email,
+            password: hashedPassword
+        });
+
+        await newUser.save();
+
+        res.status(201).json({
+            message: "Admin registered successfully",
+            user: {
+                Name: newUser.Name,
+                email: newUser.email
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "Error registering admin",
+            error: error.message
+        });
+    }
+}
 export async function loginadmin(req,res){
     const email = req.body.email
     const password = req.body.password
