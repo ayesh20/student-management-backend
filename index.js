@@ -4,6 +4,7 @@ import bodyParser from "body-parser"
 import adminRouter from "./routers/adminRouter.js"
 import studentRouter from "./routers/studentRouter.js"
 import attendenceRouter from "./routers/attendenceRouter.js"
+import paymentRouter from "./routers/paymentRouter.js"
 import jwt, { decode } from "jsonwebtoken";
 import cors from "cors";
 import dotenv from "dotenv"
@@ -62,6 +63,7 @@ mongoose.connect(connectionString).then(
 app.use("/api/admin", adminRouter)
 app.use("/api/students", studentRouter)
 app.use("/api/attendance", attendenceRouter)
+app.use("/api/payments", paymentRouter)
 
 
 
