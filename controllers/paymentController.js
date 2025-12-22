@@ -13,7 +13,7 @@ export async function addPayment(req, res) {
             remarks 
         } = req.body;
         
-        const collectedBy = req.user.email; // From JWT token
+        const collectedBy = req.user.email; 
 
         if (!studentId || !amount || !paymentMethod || !paymentType) {
             return res.status(400).json({
@@ -30,7 +30,6 @@ export async function addPayment(req, res) {
             });
         }
 
-        // Check if monthly payment already exists for this month
         if (paymentType === 'monthly_fee' && month) {
             const existingPayment = await Payment.findOne({
                 studentId: studentId,
@@ -46,11 +45,9 @@ export async function addPayment(req, res) {
             }
         }
 
-        // Generate receipt number
         const count = await Payment.countDocuments();
         const receiptNumber = `REC${Date.now()}-${count + 1}`;
 
-        // Create new payment
         const newPayment = new Payment({
             studentId: student._id,
             StudentID: student.StudentID,
@@ -67,7 +64,7 @@ export async function addPayment(req, res) {
 
         await newPayment.save();
 
-        // Update student's payment status to 'completed'
+        
         student.paymentstatus = 'completed';
         await student.save();
 
@@ -92,7 +89,6 @@ export async function getAllPayments(req, res) {
             .sort({ paymentDate: -1 })
             .populate('studentId', 'StudentID StudentName email phoneNo');
 
-        // Calculate total amount
         const totalAmount = payments.reduce((sum, payment) => sum + payment.amount, 0);
 
         res.status(200).json({
@@ -118,7 +114,6 @@ export async function getStudentPayments(req, res) {
         const payments = await Payment.find({ studentId: studentId })
             .sort({ paymentDate: -1 });
 
-        // Calculate total paid
         const totalPaid = payments.reduce((sum, payment) => 
             payment.status === 'completed' ? sum + payment.amount : sum, 0
         );
@@ -169,7 +164,7 @@ export async function getPaymentByReceipt(req, res) {
 
 export async function getPaymentsByMonth(req, res) {
     try {
-        const { month } = req.params; // Format: YYYY-MM
+        const { month } = req.params; 
 
         const payments = await Payment.find({ 
             month: month,
@@ -210,23 +205,19 @@ export async function getPaymentStats(req, res) {
 
         const payments = await Payment.find(query);
 
-        // Calculate statistics
         const totalAmount = payments.reduce((sum, p) => sum + p.amount, 0);
         const totalPayments = payments.length;
 
-        // Group by payment method
         const byMethod = payments.reduce((acc, p) => {
             acc[p.paymentMethod] = (acc[p.paymentMethod] || 0) + p.amount;
             return acc;
         }, {});
 
-        // Group by payment type
         const byType = payments.reduce((acc, p) => {
             acc[p.paymentType] = (acc[p.paymentType] || 0) + p.amount;
             return acc;
         }, {});
 
-        // Get unique students who paid
         const uniqueStudents = [...new Set(payments.map(p => p.studentId.toString()))];
 
         res.status(200).json({
@@ -264,7 +255,6 @@ export async function updatePayment(req, res) {
             });
         }
 
-        // Update fields
         if (amount) payment.amount = amount;
         if (paymentMethod) payment.paymentMethod = paymentMethod;
         if (paymentType) payment.paymentType = paymentType;
@@ -303,13 +293,13 @@ export async function deletePayment(req, res) {
 
         await Payment.findByIdAndDelete(id);
 
-        // Check if student has any other payments
+  
         const remainingPayments = await Payment.find({
             studentId: payment.studentId,
             status: 'completed'
         });
 
-        // If no remaining payments, update student status to pending
+       
         if (remainingPayments.length === 0) {
             const student = await Student.findById(payment.studentId);
             if (student) {
@@ -334,7 +324,7 @@ export async function deletePayment(req, res) {
 
 export async function getPendingPayments(req, res) {
     try {
-        // Get all students with pending payment status
+       
         const pendingStudents = await Student.find({ 
             paymentstatus: 'pending' 
         }).select('StudentID StudentName email phoneNo paymentstatus');

@@ -63,13 +63,13 @@ const paymentSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Index for faster queries
+
 paymentSchema.index({ studentId: 1, paymentDate: -1 });
 paymentSchema.index({ StudentID: 1 });
 paymentSchema.index({ receiptNumber: 1 });
 paymentSchema.index({ month: 1 });
 
-// Generate receipt number before saving
+
 paymentSchema.pre('save', async function(next) {
     if (!this.receiptNumber) {
         const count = await mongoose.model('payments').countDocuments();

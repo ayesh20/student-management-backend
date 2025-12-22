@@ -1,8 +1,5 @@
 import Student from "../models/student.js";
 
-// @desc    Add new student
-// @route   POST /api/students/add
-// @access  Private (requires auth)
 export async function addStudent(req, res) {
     try {
         const { 
@@ -15,7 +12,7 @@ export async function addStudent(req, res) {
             email
         } = req.body;
 
-        // Validation
+       
         if (!StudentID || !StudentName || !address || !phoneNo || !DateOfBirth || !gender) {
             return res.status(400).json({
                 success: false,
@@ -23,7 +20,6 @@ export async function addStudent(req, res) {
             });
         }
 
-        // Check if student ID already exists
         const existingStudent = await Student.findOne({ StudentID });
         if (existingStudent) {
             return res.status(400).json({
@@ -41,8 +37,8 @@ export async function addStudent(req, res) {
             DateOfBirth,
             gender,
             email: email || "",
-            attendence: 0, // Default attendance
-            paymentstatus: "pending" // Default payment status
+            attendence: 0, 
+            paymentstatus: "pending" 
         });
 
         await newStudent.save();
@@ -62,9 +58,7 @@ export async function addStudent(req, res) {
     }
 }
 
-// @desc    Get all students
-// @route   GET /api/students/all
-// @access  Private
+
 export async function getAllStudents(req, res) {
     try {
         const students = await Student.find({}).sort({ createdAt: -1 });
@@ -84,9 +78,7 @@ export async function getAllStudents(req, res) {
     }
 }
 
-// @desc    Get single student by ID
-// @route   GET /api/students/:id
-// @access  Private
+
 export async function getStudentById(req, res) {
     try {
         const student = await Student.findById(req.params.id);
@@ -112,9 +104,7 @@ export async function getStudentById(req, res) {
     }
 }
 
-// @desc    Update student
-// @route   PUT /api/students/update/:id
-// @access  Private
+
 export async function updateStudent(req, res) {
     try {
         const { 
@@ -137,7 +127,6 @@ export async function updateStudent(req, res) {
             });
         }
 
-        // Update fields
         student.StudentName = StudentName || student.StudentName;
         student.address = address || student.address;
         student.phoneNo = phoneNo || student.phoneNo;
@@ -164,9 +153,6 @@ export async function updateStudent(req, res) {
     }
 }
 
-// @desc    Delete student
-// @route   DELETE /api/students/delete/:id
-// @access  Private
 export async function deleteStudent(req, res) {
     try {
         const student = await Student.findById(req.params.id);
@@ -199,9 +185,6 @@ export async function deleteStudent(req, res) {
     }
 }
 
-// @desc    Search students
-// @route   GET /api/students/search?query=
-// @access  Private
 export async function searchStudents(req, res) {
     try {
         const searchQuery = req.query.query;
@@ -237,9 +220,6 @@ export async function searchStudents(req, res) {
     }
 }
 
-// @desc    Update student payment status
-// @route   PATCH /api/students/payment/:id
-// @access  Private
 export async function updatePaymentStatus(req, res) {
     try {
         const { paymentstatus } = req.body;
@@ -278,9 +258,7 @@ export async function updatePaymentStatus(req, res) {
     }
 }
 
-// @desc    Update student attendance
-// @route   PATCH /api/students/attendance/:id
-// @access  Private
+
 export async function updateAttendance(req, res) {
     try {
         const { attendence } = req.body;

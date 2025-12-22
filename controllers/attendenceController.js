@@ -4,9 +4,8 @@ import Student from "../models/student.js";
 export async function markAttendance(req, res) {
     try {
         const { studentId, date, status, remarks } = req.body;
-        const markedBy = req.user.email; // From JWT token
+        const markedBy = req.user.email; 
 
-        // Validation
         if (!studentId || !date || !status) {
             return res.status(400).json({
                 success: false,
@@ -14,7 +13,6 @@ export async function markAttendance(req, res) {
             });
         }
 
-        // Get student details
         const student = await Student.findById(studentId);
         if (!student) {
             return res.status(404).json({
@@ -23,14 +21,12 @@ export async function markAttendance(req, res) {
             });
         }
 
-        // Check if attendance already exists for this date
         const existingAttendance = await Attendance.findOne({
             studentId: studentId,
             date: new Date(date)
         });
 
         if (existingAttendance) {
-            // Update existing attendance
             existingAttendance.status = status;
             existingAttendance.remarks = remarks || '';
             existingAttendance.markedBy = markedBy;
@@ -43,7 +39,6 @@ export async function markAttendance(req, res) {
             });
         }
 
-        // Create new attendance record
         const newAttendance = new Attendance({
             studentId: student._id,
             StudentID: student.StudentID,
@@ -56,7 +51,6 @@ export async function markAttendance(req, res) {
 
         await newAttendance.save();
 
-        // Update student's total attendance count if present
         if (status === 'present') {
             student.attendence = (student.attendence || 0) + 1;
             await student.save();
@@ -107,14 +101,13 @@ export async function markBulkAttendance(req, res) {
                     continue;
                 }
 
-                // Check if attendance already exists
                 const existingAttendance = await Attendance.findOne({
                     studentId: record.studentId,
                     date: new Date(date)
                 });
 
                 if (existingAttendance) {
-                    // Update existing
+
                     existingAttendance.status = record.status;
                     existingAttendance.remarks = record.remarks || '';
                     existingAttendance.markedBy = markedBy;
@@ -122,7 +115,6 @@ export async function markBulkAttendance(req, res) {
                     
                     results.success.push(existingAttendance);
                 } else {
-                    // Create new
                     const newAttendance = new Attendance({
                         studentId: student._id,
                         StudentID: student.StudentID,
@@ -135,7 +127,6 @@ export async function markBulkAttendance(req, res) {
 
                     await newAttendance.save();
 
-                    // Update student's total attendance count
                     if (record.status === 'present') {
                         student.attendence = (student.attendence || 0) + 1;
                         await student.save();
@@ -199,7 +190,6 @@ export async function getStudentAttendance(req, res) {
             studentId: studentId
         }).sort({ date: -1 });
 
-        // Calculate statistics
         const totalDays = attendanceRecords.length;
         const presentDays = attendanceRecords.filter(a => a.status === 'present').length;
         const absentDays = attendanceRecords.filter(a => a.status === 'absent').length;
@@ -246,7 +236,6 @@ export async function getAttendanceReport(req, res) {
             }
         }).sort({ date: -1, StudentName: 1 });
 
-        // Group by student
         const studentStats = {};
         
         attendanceRecords.forEach(record => {
@@ -267,7 +256,6 @@ export async function getAttendanceReport(req, res) {
             if (record.status === 'late') studentStats[record.studentId].late++;
         });
 
-        // Calculate percentages
         Object.keys(studentStats).forEach(key => {
             const stats = studentStats[key];
             stats.attendancePercentage = ((stats.present / stats.total) * 100).toFixed(2);
@@ -304,7 +292,6 @@ export async function deleteAttendance(req, res) {
             });
         }
 
-        // If it was marked as present, decrease student's attendance count
         if (attendance.status === 'present') {
             const student = await Student.findById(attendance.studentId);
             if (student && student.attendence > 0) {

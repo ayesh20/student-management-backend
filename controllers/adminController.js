@@ -9,7 +9,7 @@ export async function registerAdmin(req, res) {
     const { Name, email, password } = req.body;
 
     try {
-        // Check if user already exists
+
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({
@@ -17,10 +17,9 @@ export async function registerAdmin(req, res) {
             });
         }
 
-        // Hash the password
         const hashedPassword = bcrypt.hashSync(password, 10);
 
-        // Create new user
+
         const newUser = new User({
             Name,
             email,

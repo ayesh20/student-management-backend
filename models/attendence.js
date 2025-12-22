@@ -35,7 +35,6 @@ const attendanceSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Create compound index to prevent duplicate attendance for same student on same date
 attendanceSchema.index({ studentId: 1, date: 1 }, { unique: true });
 
 attendanceSchema.index({ date: -1 });
